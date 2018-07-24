@@ -7,12 +7,15 @@
  */
 
 import React, {Component} from 'react';
+import Tts from 'react-native-tts';
 import {Platform, StyleSheet, Text, View, Button} from 'react-native';
 
 type Props = {};
 export default class App extends Component<Props> {
   onButtonPress(){
-    alert(1);
+    Tts.getInitStatus().then(() => {
+      Tts.speak('Hello, world!');
+    });
   }
 
   
