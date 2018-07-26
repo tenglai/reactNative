@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   Image,
+  ImageBackground,
   Text,
   View,
   Dimensions,
@@ -104,7 +105,7 @@ export default class Account extends Component {
             onPress={this._pickPhoto}
             style={styles.avatarContainer}
           >
-            <Image
+            <ImageBackground
               style={styles.avatarContainer}
               source={{uri: user.avatar}}
             >
@@ -128,7 +129,7 @@ export default class Account extends Component {
                 }
               </View>
               <Text style={styles.avatarText}>点击这里更换头像</Text>
-            </Image>
+            </ImageBackground>
           </TouchableOpacity>
           :
           <View style={styles.avatarContainer}>
