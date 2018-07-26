@@ -3,11 +3,9 @@
  */
 import React, {Component} from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   TouchableOpacity,
   AsyncStorage,
-  Platform,
   TextInput,
   Modal,
   Image,
@@ -18,21 +16,22 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import ImagePicker from 'react-native-image-picker';
-import config from '../../common/config';
-import request from '../../common/request';
+import config from '../common/config';
+import request from '../common/request';
 import sha1 from 'sha1';
 import * as Progress from 'react-native-progress';
 
-const {width, height} = Dimensions.get('window');
 
+const {width} = Dimensions.get('window');
 let pickPhotoOptions = {
-  title: '选择头像',
-  cancelButtonTitle: '取消',
-  takePhotoButtonTitle: '拍照',
-  chooseFromLibraryButtonTitle: '从相册...',
+  title: 'Select Avatar',
+  cancelButtonTitle: 'Cancel',
+  takePhotoButtonTitle: 'Photo',
+  chooseFromLibraryButtonTitle: 'From album...',
   customButtons: [
     {
-      name: 'vip', title: 'Go RN VIP论坛'
+      name: 'vip',
+      title: 'Go RN VIP Forum'
     }
   ],
   quality: 0.8,
@@ -43,15 +42,23 @@ let pickPhotoOptions = {
     path: 'images'
   }
 };
-
+// const CLOUDINARY = {
+//   cloud_name: 'mybaby',
+//   api_key: '658556635518849',
+//   api_secret: 'GxyumaJ1f_qcAhUPTC384yuseSY',
+//   base: 'https://res.cloudinary.com/mybaby',
+//   image: 'https://api.cloudinary.com/v1_1/mybaby/image/upload',
+//   video: 'https://api.cloudinary.com/v1_1/mybaby/video/upload',
+//   audio: 'https://api.cloudinary.com/v1_1/mybaby/raw/upload',
+// };
 const CLOUDINARY = {
-  cloud_name: 'mybaby',
-  api_key: '658556635518849',
-  api_secret: 'GxyumaJ1f_qcAhUPTC384yuseSY',
-  base: 'https://res.cloudinary.com/mybaby',
-  image: 'https://api.cloudinary.com/v1_1/mybaby/image/upload',
-  video: 'https://api.cloudinary.com/v1_1/mybaby/video/upload',
-  audio: 'https://api.cloudinary.com/v1_1/mybaby/raw/upload',
+  cloud_name: 'dlwilyjng',
+  api_key: '499135353216869',
+  api_secret: 'KK0FxUTpBmXtom8BArBo6M0Oarc',
+  base: 'https://res.cloudinary.com/dlwilyjng',
+  image: 'https://api.cloudinary.com/v1_1/dlwilyjng/image/upload',
+  video: 'https://api.cloudinary.com/v1_1/dlwilyjng/video/upload',
+  audio: 'https://api.cloudinary.com/v1_1/dlwilyjng/raw/upload',
 };
 
 
@@ -63,9 +70,12 @@ export default class Account extends Component {
       user: null,
       avatarProgress: 0,
       avatarUploading: false,
-      animationType: 'fade',//none slide fade
-      modalVisible: false,//模态场景是否可见
-      transparent: false,//是否透明显示
+      // none slide fade
+      animationType: 'fade',
+      // Whether modal scenes are visible
+      modalVisible: false,
+      // Transparent display
+      transparent: false,
     };
 
     this._asyncGetAppStatus = this._asyncGetAppStatus.bind(this);
@@ -83,172 +93,175 @@ export default class Account extends Component {
 
   render() {
     let user = this.state.user;
-
     if (!user) {
       return <View/>
     }
 
-    //图床   国外 配置简单 国内  7牛
-    //国外的:http://cloudinary.com/
-    //7牛：https://portal.qiniu.com/signup?code=3lld4je7hakb6
+    // 图床:   国外 配置简单 国内  7牛
+    // 国外的cloudinary: http://cloudinary.com/
+    // 7牛：https://portal.qiniu.com/signup?code=3lld4je7hakb6
 
     return (
-      <View style={styles.container}>
-        <View style={styles.toolBar}>
-          <Text style={styles.toolBarText}>我的账户</Text>
-          <Text onPress={this._editAccount} style={styles.toolBarEdit}>编辑</Text>
-        </View>
-        {/*如果有用户的头像则显示用户的头像，如果没有则现在添加用户头像的图标*/}
-        {
-          user.avatar ?
-          <TouchableOpacity
-            onPress={this._pickPhoto}
-            style={styles.avatarContainer}
-          >
-            <ImageBackground
-              style={styles.avatarContainer}
-              source={{uri: user.avatar}}
-            >
-              <View style={styles.avatarBox}>
-                {/*如果是正在上传的话就显示饼状的进度条，反之就显示image*/}
-                {
-                  this.state.avatarUploading
-                    ?
-                    <Progress.Circle
-                      size={75}
-                      showsText={true}
-                      color={'#ee735d'}
-                      progress={this.state.avatarProgress}
-                    />
-                    :
-                    <Image
-                      style={styles.avatar}
+        <View style={styles.container}>
+          <View style={styles.toolBar}>
+            <Text style={styles.toolBarText}>My Account</Text>
+            <Text onPress={this._editAccount} style={styles.toolBarEdit}>Edit</Text>
+          </View>
+
+          {/* If the user's avatar will display the user's avatar, if not, now add the user avatar icon */}
+          {
+            user.avatar ?
+                <TouchableOpacity
+                    onPress={this._pickPhoto}
+                    style={styles.avatarContainer}
+                >
+                  <ImageBackground
                       source={{uri: user.avatar}}
-                    >
-                    </Image>
-                }
-              </View>
-              <Text style={styles.avatarText}>点击这里更换头像</Text>
-            </ImageBackground>
-          </TouchableOpacity>
-          :
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>添加用户头像</Text>
-            <TouchableOpacity onPress={this._pickPhoto} style={styles.avatarBox}>
-              {/*如果是正在上传的话就显示饼状的进度条，反之就显示icon*/}
-              {
-                this.state.avatarUploading ?
-                  <Progress.Circle
-                    size={75}
-                    showsText={true}
-                    color={'#ee735d'}
-                    progress={this.state.avatarProgress}
-                  />
-                  :
-                  <Icon
-                    name='md-add'
-                    size={45}
-                    style={styles.plusIcon}
-                  />
-              }
-            </TouchableOpacity>
-          </View>
-        }
-        <Modal
-          animationType={this.state.animationType}
-          transparent={this.state.transparent}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {
-            this._setModalVisible(false)
-          }}
-          onShow={this._startShow}
-        >
-          <View style={styles.modalContainer}>
-            <Icon
-              name='ios-close-outline'
-              size={45}
-              onPress={this._closeModal}
-              style={styles.closeIcon}
-            />
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>昵称</Text>
-              <TextInput
-                placeholder='请输入你的昵称'
-                placeholderTextColor='blue'
-                underlineColorAndroid='transparent'
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                style={styles.inputField}
-                defaultValue={user.nickname}
-                onChangeText={(text) => {
-                  this._changeUserInfo('nickname', text);
-                }}
-              />
-            </View>
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>年龄</Text>
-              <TextInput
-                placeholder='请输入你的年龄'
-                placeholderTextColor='blue'
-                underlineColorAndroid='transparent'
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                style={styles.inputField}
-                defaultValue={user.age}
-                onChangeText={(text) => {
-                  this._changeUserInfo('age', text);
-                }}
-              />
-            </View>
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>性别</Text>
-              <Icon.Button
-                name="ios-paw"
-                onPress={() => {
-                  this._changeUserInfo('gender', 'male')
-                }}
-                style={[
-                  styles.gender,
-                  user.gender === 'male' && styles.genderChecked
-                ]}
-              >
-                男宝宝
-              </Icon.Button>
-              <Icon.Button
-                name="ios-paw"
-                onPress={() => {
-                  this._changeUserInfo('gender', 'female')
-                }}
-                style={[
-                  styles.gender,
-                  user.gender === 'female' && styles.genderChecked
-                ]}
-              >
-                女宝宝
-              </Icon.Button>
-            </View>
-            <View style={styles.btn}>
-              <Text style={styles.btnText} onPress={this._saveUserInfo}>保存</Text>
-            </View>
-          </View>
-        </Modal>
-        <View style={styles.btn}>
-          <Text
-            style={styles.btnText}
-            onPress={this._logout.bind(this)}
+                      style={styles.avatarContainer}
+                  >
+                    <View style={styles.avatarBox}>
+                      {/* If it is being uploaded, show the pie-like progress bar, on the contrary, display image */}
+                      {
+                        this.state.avatarUploading
+                          ?
+                          <Progress.Circle
+                            size={75}
+                            showsText={true}
+                            color={'#ee735d'}
+                            progress={this.state.avatarProgress}
+                          />
+                          :
+                          <Image
+                            source={{uri: user.avatar}}
+                            style={styles.avatar}
+                          >
+                          </Image>
+                      }
+                    </View>
+                    <Text style={styles.avatarText}>Click here to change avatar</Text>
+                  </ImageBackground>
+                </TouchableOpacity>
+                :
+                <View style={styles.avatarContainer}>
+                  <Text style={styles.avatarText}>Add User Avatar</Text>
+                  <TouchableOpacity
+                      onPress={this._pickPhoto}
+                      style={styles.avatarBox}
+                  >
+                    {/* If you are uploading, show the cake-like progress bar, on the contrary, show icon */}
+                    {
+                      this.state.avatarUploading ?
+                          <Progress.Circle
+                              size={75}
+                              showsText={true}
+                              color={'#ee735d'}
+                              progress={this.state.avatarProgress}
+                          />
+                          :
+                          <Icon
+                              name='md-add'
+                              size={45}
+                              style={styles.plusIcon}
+                          />
+                    }
+                  </TouchableOpacity>
+                </View>
+          }
+          <Modal
+              animationType={this.state.animationType}
+              transparent={this.state.transparent}
+              visible={this.state.modalVisible}
+              onRequestClose={() => {
+                this._setModalVisible(false)
+              }}
+              onShow={this._startShow}
           >
-            退出登录
-          </Text>
+            <View style={styles.modalContainer}>
+              <Icon
+                  name='ios-close-outline'
+                  size={45}
+                  onPress={this._closeModal}
+                  style={styles.closeIcon}
+              />
+              <View style={styles.fieldItem}>
+                <Text style={styles.label}>Nickname</Text>
+                <TextInput
+                    placeholder='Please enter your nickname'
+                    placeholderTextColor='blue'
+                    underlineColorAndroid='transparent'
+                    autoCorrect={false}
+                    autoCapitalize={'none'}
+                    style={styles.inputField}
+                    defaultValue={user.nickname}
+                    onChangeText={(text) => {
+                      this._changeUserInfo('nickname', text);
+                    }}
+                />
+              </View>
+              <View style={styles.fieldItem}>
+                <Text style={styles.label}>Age</Text>
+                <TextInput
+                    placeholder='Please enter your age'
+                    placeholderTextColor='blue'
+                    underlineColorAndroid='transparent'
+                    autoCorrect={false}
+                    autoCapitalize={'none'}
+                    style={styles.inputField}
+                    defaultValue={user.age}
+                    onChangeText={(text) => {
+                      this._changeUserInfo('age', text);
+                    }}
+                />
+              </View>
+              <View style={styles.fieldItem}>
+                <Text style={styles.label}>Gender</Text>
+                <Icon.Button
+                    name="ios-paw"
+                    onPress={() => {
+                      this._changeUserInfo('gender', 'male')
+                    }}
+                    style={[
+                      styles.gender,
+                      user.gender === 'male' && styles.genderChecked
+                    ]}
+                >
+                  Male
+                </Icon.Button>
+                <Icon.Button
+                    name="ios-paw"
+                    onPress={() => {
+                      this._changeUserInfo('gender', 'female')
+                    }}
+                    style={[
+                      styles.gender,
+                      user.gender === 'female' && styles.genderChecked
+                    ]}
+                >
+                  Female
+                </Icon.Button>
+              </View>
+              <View style={styles.btn}>
+                <Text style={styles.btnText} onPress={this._saveUserInfo}>Save</Text>
+              </View>
+            </View>
+          </Modal>
+          <View style={styles.btn}>
+            <Text
+                style={styles.btnText}
+                onPress={this._logout.bind(this)}
+            >
+              Log out
+            </Text>
+          </View>
         </View>
-      </View>
     );
   }
 
   _logout() {
-    //清空本地的用户存储 改变整个app的登录状态
+    // Empty the local user store to change the entire app's login status
     // alert('logout');
     // this.props.logout();
-    const {navigate} = this.props.navigation
+    const {navigate} = this.props.navigation;
     navigate('Login');
     // this.props.logout();
   }
@@ -261,8 +274,7 @@ export default class Account extends Component {
     // console.log('key---'+key+'--value-'+value);
     let user = this.state.user;
     user[key] = value;
-    console.log('改变后' + JSON.stringify(user));
-
+    console.log('Change' + JSON.stringify(user));
     this.setState({
       user: user
     });
@@ -273,7 +285,7 @@ export default class Account extends Component {
   }
 
   _startShow() {
-    console.log('开始显示modal');
+    console.log('Start showing modal');
   }
 
   _closeModal() {
@@ -286,33 +298,29 @@ export default class Account extends Component {
   }
 
   _pickPhoto() {
-
+    // react-native-image-picker copy!
     ImagePicker.showImagePicker(pickPhotoOptions, (response) => {
       console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
-      }
-      else if (response.error) {
+      } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
-      }
-      else if (response.customButton) {
+      } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
-      }
-      else {
+      } else {
         // You can display the image using either data...
         // const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
-        //第一种方案
-        //当我们需要上传图片的时候 图片的base64
+        // First Scenario
+        // Base64 when we need to upload pictures
         let avatarUri = 'data:image/jpeg;base64,' + response.data;
-
-        //开始上传图片服务器   图床
-        //在自己的服务器中生成签名
+        // Start uploading image servers
+        // Generate signatures on your own server
         let timestamp = Date.now();
         let tags = 'app,avatar';
         let folder = 'avatar';
         let accessToken = this.state.user.accessToken;
         let signatureUrl = config.api.base + config.api.signature;
+
         request
           .post(signatureUrl, {
             accessToken: accessToken,
@@ -320,33 +328,32 @@ export default class Account extends Component {
             folder: folder,
             timestamp: timestamp,
           })
-          .then(
-            (data) => {
-              if (data && data.success) {
-                //data.data 就是服务器给我们生成的签名
-                console.log('服务器给我们生成的签名模拟的-' + data.data);
-                //自己在本地生成签名
-                let signature = 'folder=' + folder + '&tags=' +
-                    tags + '&timestamp=' + timestamp + CLOUDINARY.api_secret;
-                //sha1加密
-                signature = sha1(signature);
+          .then((data) => {
+            if (data && data.success) {
+              // data.data : Is the signature that the server generated for us.
+              console.log('The signature generated by the server-' + data.data);
+              // Generate signatures locally
+              let signature = 'folder=' + folder
+                  + '&tags=' + tags
+                  + '&timestamp=' + timestamp
+                  + CLOUDINARY.api_secret;
+              // sha1 encryption
+              signature = sha1(signature);
+              console.log('Server-generated signatures：' + signature);
 
-                console.log('服务器生成的签名：' + signature);
+              // Start post to graph bed
+              let body = new FormData();
+              body.append('folder', folder);
+              body.append('tags', tags);
+              body.append('api_key', CLOUDINARY.api_key);
+              body.append('signature', signature);
+              body.append('resource_type', 'image');
+              body.append('file', avatarUri);
+              body.append('timestamp', timestamp);
 
-                //开始post到图床了
-                let body = new FormData();
-                body.append('folder', folder);
-                body.append('tags', tags);
-                body.append('api_key', CLOUDINARY.api_key);
-                body.append('signature', signature);
-                body.append('resource_type', 'image');
-                body.append('file', avatarUri);
-                body.append('timestamp', timestamp);
-
-                this._uploadToCloud(body);
-              }
+              this._uploadToCloud(body);
             }
-          )
+          })
           .catch((err) => {
             console.log(err);
           });
@@ -367,31 +374,32 @@ export default class Account extends Component {
 
     uploadRequest.onload = () => {
       if (uploadRequest.status !== 200) {
-        return alert('请求失败：' + uploadRequest.responseText);
+        return alert('Request failed：' + uploadRequest.responseText);
       }
       if (!uploadRequest.responseText) {
-        return alert('返回了一个空的消息体');
+        return alert('Returned an empty message body');
       }
 
       let response;
       let responseText;
       try {
         responseText = uploadRequest.responseText;
-        console.log('图床服务器返回的:' + responseText);
+        console.log('The graph bed server returns the:' + responseText);
         response = JSON.parse(responseText)
       } catch (e) {
         console.log(e);
       }
 
       if (response && response.public_id) {
-        //更新我们的视图
+        // Update our view
         let user = this.state.user;
-        //https://res.cloudinary.com/mybaby
+        // https://res.cloudinary.com/mybaby
         // /image/upload/v1477463217/avatar/e7g5cpfbxtjjrxsbirbp.jpg
-
         let cloudUrl = CLOUDINARY.base + '/image/upload/v'
-            + response.version + '/' + response.public_id + '.' + response.format;
-        console.log('上传图床后的地址:' + cloudUrl);
+            + response.version + '/'
+            + response.public_id + '.'
+            + response.format;
+        console.log('Post the address of the graph bed:' + cloudUrl);
         user.avatar = cloudUrl;
 
         this.setState({
@@ -402,15 +410,15 @@ export default class Account extends Component {
 
         this._asyncUpdateUser();
       }
-    }
+    };
 
-    //得到上传图片的进度数据
+    // Get the progress data for the uploaded image
     if (uploadRequest.upload) {
       uploadRequest.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           let percent = Number((event.loaded / event.total).toFixed(2));
           this.setState({
-            avatarProgress: percent,
+            avatarProgress: percent
           });
         }
       }
@@ -418,36 +426,30 @@ export default class Account extends Component {
   }
 
   _asyncUpdateUser() {
-    //更新一下用户信息到：自己的服务器  本地
+    // Update user information to: own server local
     let user = this.state.user;
-    console.log('开始同步用户信息了:' + JSON.stringify(user));
+    console.log('Start synchronizing user information:' + JSON.stringify(user));
 
     AsyncStorage
-        .setItem('user', JSON.stringify(user))
-        .then(
-            () => {
-              console.log('更新本地成功啦');
-            }
-        )
-        .catch((err) => {
-          console.log(err);
-        });
+      .setItem('user', JSON.stringify(user))
+      .then(() => {
+        console.log('Update Local success');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
-    //更新自己的服务器
+    // Update your own server
     let url = config.api.base + config.api.update;
     request
       .post(url, user)
-      .then(
-        (data) => {
-          if (data && data.success) {
-            alert('更新用户信息到服务器成功啦');
-
-            //自己去实现 从服务器返回的数据里去更新本地的user state
-
-            this._closeModal();
-          }
+      .then((data) => {
+        if (data && data.success) {
+          alert('Update user information to server success');
+          // Do it yourself, update the user state from the data returned by the server
+          this._closeModal();
         }
-      )
+      })
       .catch((err) => {
         console.log(err);
       });
@@ -459,16 +461,13 @@ export default class Account extends Component {
 
   _asyncGetAppStatus() {
     AsyncStorage
-      .getItem('user')
-      .then(
-        (data) => {
+        .getItem('user')
+        .then((data) => {
           let user;
           let newState = {};
           if (data) {
-
             user = JSON.parse(data);
           }
-
           if (user && user.accessToken) {
             newState.logined = true;
             newState.user = user;
@@ -476,13 +475,11 @@ export default class Account extends Component {
           } else {
             newState.logined = false;
           }
-
           this.setState(newState);
-        }
-      )
-      .catch((err) => {
-        alert(err);
-      });
+        })
+        .catch((err) => {
+          alert(err);
+        });
   }
 }
 
