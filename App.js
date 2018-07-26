@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 // 导航
-import {StackNavigator, TabNavigator, DrawerNavigator} from 'react-navigation';
+import { createBottomTabNavigator, createStackNavigator } from 'react-navigation';
 // 图标
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -41,7 +41,7 @@ class TabBarItem extends Component {
   }
 }
 
-const Tab = TabNavigator(
+const Tab = createBottomTabNavigator(
   {
     List: {
       screen: ListScreen,
@@ -127,7 +127,7 @@ const Tab = TabNavigator(
       // 文字和图片未选中颜色
       inactiveTintColor: '#999',
       // label和icon的背景色 未选中。
-      inactiveBackgroundColor: '#E8E5F8',
+      inactiveBackgroundColor: '#fff',
       // 是否显示label，默认开启。
       showLabel: true,
       // android 默认不显示 icon, 需要设置为 true 才会显示
@@ -152,13 +152,13 @@ const Tab = TabNavigator(
 
 
 // 初始化StackNavigator
-const Navigator = StackNavigator(
+const Navigator = createStackNavigator(
   {
     // 将TabNavigator包裹在StackNavigator里面可以保证跳转页面的时候隐藏tabbar
     Tab: {
       screen: Tab,
       navigationOptions: {
-        header: null
+        header: null // 顶部导航很多都会自己自定义，这里就为空
       }
     },
     Detail: {
@@ -176,7 +176,7 @@ const Navigator = StackNavigator(
   },
   {
     //initialRouteName: 'Login'
-    initialRouteName: 'Tab'
+    initialRouteName: 'Tab' // 默认出现的Tab页面
   }
 );
 

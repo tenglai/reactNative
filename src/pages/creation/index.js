@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
+  ImageBackground,
   ListView,
   TouchableHighlight,
   Alert,
@@ -230,7 +230,7 @@ class Item extends Component {
       <TouchableHighlight onPress={this.props.onSelect}>
         <View style={styles.item}>
           <Text style={styles.title}>{row.title}</Text>
-          <Image
+          <ImageBackground
               style={styles.thumb}
               source={{uri: row.thumb}}
           >
@@ -239,7 +239,7 @@ class Item extends Component {
                 name={'ios-play'}
                 size={28}
             />
-          </Image>
+          </ImageBackground>
           <View style={styles.itemFooter}>
             <View style={styles.handleBox}>
               <Icon
@@ -327,8 +327,7 @@ const styles = StyleSheet.create({
 
   thumb: {
     width: width,
-    height: width * 0.56,
-    resizeMode: 'cover'
+    height: width * 0.56
   },
 
   title: {
