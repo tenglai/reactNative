@@ -1,3 +1,6 @@
+/**
+ * 视频列表页
+ */
 import React, {Component} from 'react';
 import {
   StyleSheet,
@@ -11,24 +14,30 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+// 下拉刷新/上拉加载更多组件
+import Scroller from '../../components/Scroller';
+// 图标
 import Icon from 'react-native-vector-icons/Ionicons';
+// item 组件
+import CreationItem from '../../components/CreationItem';
 import config from '../../common/config';
 import request from '../../common/request';
 
-
 let {width} = Dimensions.get("window");
+
+// 缓存列表中所有数据
 let cachedResults = {
-  nextPage: 1,
-  // data listview
-  items: [],
-  total: 0
+  nextPage: 1, // 下一页
+  items: [], // listview 数据(视频列表)
+  total: 0 // 总数
 };
 
-
 export default class List extends Component {
+  // 构造函数
   constructor() {
     super();
     let ds = new ListView.DataSource({
+      // 比较两条数据是否是一样的,来判断数据是否发生改变
       rowHasChanged: (r1, r2) => r1 !== r2
     });
     this.state = {
@@ -41,114 +50,35 @@ export default class List extends Component {
   render() {
     return (
       <View style={styles.container}>
+        {/*顶部标题栏*/}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>List Page</Text>
+          <Text style={styles.headerTitle}>列表页面</Text>
         </View>
-        <ListView
-          // array data
+        {/*列表数据*/}
+        <Scroller
+          // 数据源
           dataSource={this.state.dataSource}
-          // 从数据源(dataSource)中接受一条数据，以及它和它所在section的ID
+          // 渲染item(子组件)
           renderRow={this._renderRow.bind(this)}
-          // 页头与页脚会在每次渲染过程中都重新渲染
-          renderFooter={this._renderFooter.bind(this)}
-          // 当所有的数据都已经渲染过，并且列表被滚动到距离最底部不足onEndReachedThreshold个像素的距离时调用
-          onEndReached={this.fetchMoreData.bind(this)}
-          // 调用onEndReached之前的临界值，单位是像素。
-          onEndReachedThreshold={20}
-          // show right scrollbar ?
-          showsVerticalScrollIndicator={false}
-          // finished warning : in next release ...
-          enableEmptySections={true}
-          // Automatically adjust the contents of migration，
-          // navigation bar or tab bar or toolbar dont't cover Scrollview content。
-          // default it's true
-          automaticallyAdjustContentInsets={false}
-          refreshControl={
-            <RefreshControl
-              // refreshing true or false
-              refreshing={this.state.isRefreshing}
-              onRefresh={this._onRefresh.bind(this)}
-              tintColor={"#ff6600"}
-              title={"Loading..."}
-            />
-          }
+          // 是否可以刷新
+          isRefreshing={this.state.isRefreshing}
+          // 是否可以加载更多
+          isLoadingTail={this.state.isLoadingTail}
+          // 请求数据
+          fetchData={this._fetchData.bind(this)}
+          // 缓存列表数据
+          cachedResults={cachedResults}
         />
       </View>
     )
   }
 
-  _renderRow(row) {
-    return (
-      <Item
-        onSelect={() => this._loadPage(row)}
-        key={row.id} // 子组件唯一性
-        row={row}
-      />
-    )
-  }
-
-  _loadPage(row) {
-    // Navigator 压站操作
-    // this.props.navigator.push({
-    // name: 'detail',
-    // component: Detail,
-    // Passing parameters
-    // params: {
-    //   data: row
-    // }
-    // })
-    const {navigate} = this.props.navigation;
-    navigate('Detail', {
-      data: row
-    });
-  }
-
-  _hasMore() {
-    return cachedResults.items.length !== cachedResults.items.total;
-  }
-
-  _renderFooter() {
-    if (!this._hasMore() && cachedResults.items.total !== 0) {
-      return (
-        <View style={styles.loadingMore}>
-          <Text style={styles.loadingText}>No more</Text>
-        </View>
-      )
-    }
-
-    if (!this.state.isLoadingTail) {
-      return (
-        <View style={styles.loadingMore}></View>
-      )
-    }
-
-    // 菊花图
-    return (
-      <ActivityIndicator style={styles.loadingMore}/>
-    )
-  }
-
-  _onRefresh() {
-    if (this.state.isRefreshing || !this._hasMore()) {
-      return
-    }
-    this._fetchData(0);
-  }
-
-  // The request data timing
+  // 生命周期-组件挂载完毕 请求数据
   componentDidMount() {
     this._fetchData(1);
   }
 
-  fetchMoreData() {
-    if (!this._hasMore() || this.state.isLoadingTail) {
-      return
-    }
-    let page = cachedResults.nextPage;
-    this._fetchData(page);
-  }
-
-  // asynchronous:  Not exposed outside '_'
+  // 请求数据
   _fetchData(page) {
     let that = this;
 
@@ -172,6 +102,7 @@ export default class List extends Component {
           // 保存原数据
           let items = cachedResults.items.slice();
           if (page !== 0) {
+            // 数组拼接
             items = items.concat(data.data);
             cachedResults.nextPage += 1;
           } else {
@@ -179,8 +110,8 @@ export default class List extends Component {
             items = data.data.concat(items);
           }
 
-          cachedResults.items = items;
-          cachedResults.total = data.total;
+          cachedResults.items = items; // 视频列表数据
+          cachedResults.total = data.total; // 总数
 
           setTimeout(function () {
             if (page !== 0) {
@@ -210,186 +141,44 @@ export default class List extends Component {
         console.error(error);
       });
   }
-}
 
-
-class Item extends Component {
-  constructor(props) {
-    super(props);
-    // 数据
-    let row = this.props.row;
-    this.state = {
-      up: row.voted,
-      row: row
-    }
-  }
-
-  render() {
-    let row = this.state.row;
+  // 列表 Item
+  _renderRow(row) {
+    const { navigation } = this.props;
     return (
-      <TouchableHighlight onPress={this.props.onSelect}>
-        <View style={styles.item}>
-          <Text style={styles.title}>{row.title}</Text>
-          <ImageBackground
-              style={styles.thumb}
-              source={{uri: row.thumb}}
-          >
-            <Icon
-                style={styles.play}
-                name={'ios-play'}
-                size={28}
-            />
-          </ImageBackground>
-          <View style={styles.itemFooter}>
-            <View style={styles.handleBox}>
-              <Icon
-                  style={[styles.up, this.state.up ? null : styles.down]}
-                  name={this.state.up ? 'ios-heart' : 'ios-heart-outline'}
-                  size={28}
-                  onPress={this._up.bind(this)}
-              />
-              <Text
-                  style={styles.handleText}
-                  onPress={this._up.bind(this)}
-              >
-                Like
-              </Text>
-            </View>
-            <View style={styles.handleBox}>
-              <Icon
-                  style={styles.commentItem}
-                  name={'ios-happy-outline'}
-                  size={28}
-              />
-              <Text style={styles.handleText}>
-                Comment
-              </Text>
-            </View>
-          </View>
-        </View>
-      </TouchableHighlight>
+      <CreationItem
+        navigation={navigation}
+        key={row.id} // 子组件唯一性
+        row={row}
+      />
     )
   }
-
-  _up() {
-    let that = this;
-    let up = !this.state.up;
-    let row = this.state.row;
-    let url = config.api.base + config.api.up;
-    let body = {
-      id: row._id,  // important!
-      up: up ? 'yes' : 'no',
-      accessToken: 'abc'
-    };
-
-    request
-      .post(url, body)
-      .then(function (data) {
-        if (data && data.success) {
-          that.setState({
-            up: up
-          });
-        } else {
-          Alert.alert('voted fail 1');
-        }
-      })
-      .catch(function (err) {
-        Alert.alert('voted fail 2');
-      })
-  }
 }
 
-
+// 样式
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5FCFF',
   },
-
+  // 头部样式
   header: {
     paddingTop: 25,
     paddingBottom: 12,
     backgroundColor: '#ee735c',
   },
-
+  // 头部title样式
   headerTitle: {
     color: '#fff',
     fontSize: 16,
     textAlign: 'center',
     fontWeight: '600'
   },
-
-  item: {
-    width: width,
-    marginBottom: 10,
-    backgroundColor: '#fff'
-  },
-
-  thumb: {
-    width: width,
-    height: width * 0.56
-  },
-
-  title: {
-    padding: 10,
-    fontSize: 18,
-    color: '#333'
-  },
-
-  itemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#eee'
-  },
-
-  handleBox: {
-    padding: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: width / 2 - 0.5,
-    backgroundColor: '#fff'
-  },
-
-  play: {
-    position: 'absolute',
-    right: 14,
-    bottom: 14,
-    width: 46,
-    height: 46,
-    paddingTop: 9,
-    paddingLeft: 18,
-    backgroundColor: 'transparent',
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 23,
-    color: '#ed7b66'
-  },
-
-  handleText: {
-    paddingLeft: 12,
-    fontSize: 18,
-    color: '#333'
-  },
-
-  up: {
-    fontSize: 22,
-    color: '#f00'
-  },
-
-  down: {
-    fontSize: 22,
-    color: '#333'
-  },
-
-  commentItem: {
-    fontSize: 22,
-    color: '#333'
-  },
-
+  // 菊花图
   loadingMore: {
     marginVertical: 20
   },
-
+  // 文案样式
   loadingText: {
     color: '#777',
     textAlign: 'center'

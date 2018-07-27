@@ -1,5 +1,5 @@
 /**
- * 编辑页
+ * 录制视频页
  */
 import React, {Component} from 'react';
 import {
