@@ -15,7 +15,10 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import Video from 'react-native-video';
+// 顶部导航栏
+import Header from '../../components/Header';
+// 播放器组件
+import VideoPlayer from '../../components/VideoPlayer';
 import Button from 'react-native-button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import config from '../../common/config';
@@ -33,6 +36,7 @@ let cachedResults = {
 export default class Detail extends Component {
   constructor(props) {
     super(props);
+    // 获取导航器传递的参数
     const {params} = this.props.navigation.state;
     // let data = this.props.data; // _loadPage() data: row
     this.state = {
@@ -41,23 +45,6 @@ export default class Detail extends Component {
       dataSource: new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       }).cloneWithRows([]),
-
-      // video player
-      rate: 1,
-      muted: false,
-      resizeMode: 'contain',
-      repeat: false,
-
-      // video control
-      videoOk: true,
-      videoLoaded: false,
-      playing: false,
-      paused: false,
-      videoProgress: 0.01,
-
-      // all time
-      videoTotal: 0,
-      currentTime: 0,
 
       // modal
       content: '',
@@ -125,102 +112,11 @@ export default class Detail extends Component {
     let data = params.data;
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backBox}
-            onPress={this._pop.bind(this)}
-          >
-            <Icon
-              style={styles.backIcon}
-              name='ios-arrow-back'
-            />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
-          <Text
-            style={styles.headerTitle}
-            numberOfLines={1} // only 1 line
-          >
-            Video Detail Page
-          </Text>
-        </View>
-        <View style={styles.videoBox}>
-          <Video
-            style={styles.video}
-            ref="videoPlayer"
-            source={{uri: data.video}}
-            // Sound: 0 is muted, 1 is double.
-            volume={5}
-            // paused false or true
-            paused={this.state.paused}
-            // 0 is paused, 1 is normal.
-            rate={this.state.rate}
-            // Mutes true or false.
-            muted={this.state.muted}
-            // Fill the whole screen at aspect ratio
-            resizeMode={this.state.resizeMode}
-            // Repeat true or false.
-            repeat={this.state.repeat}
-            // Callback when video starts to load
-            onLoadStart={this._onLoadStart.bind(this)}
-            // Callback when video loading
-            onLoad={this._onLoad.bind(this)}
-            // Callback every ~250ms with currentTime
-            onProgress={this._onProgress.bind(this)}
-            // Callback when playback finishes
-            onEnd={this._onEnd.bind(this)}
-            // Callback when video cannot be loaded
-            onError={this._onError.bind(this)}
-          />
-          {/* 视频出错 */}
-          {
-            !this.state.videoOk && <Text style={styles.failText}>视频出错了！</Text>
-          }
-
-          {/* 没有加载 */}
-          {
-            !this.state.videoLoaded && <ActivityIndicator style={styles.loading} color="#ee735c"/>
-          }
-
-          {/* 播放结束 */}
-          {
-            this.state.videoLoaded && !this.state.playing
-              ?
-              <Icon
-                style={styles.playIcon}
-                onPress={this._rePlay.bind(this)}
-                name='ios-play'
-                size={48}
-              />
-              : null
-          }
-
-          {/* 视频正在播放，控制是否暂停 */}
-          {
-            this.state.videoLoaded && this.state.playing
-                ?
-                <TouchableOpacity
-                  style={styles.pauseBtn}
-                  onPress={this._pause.bind(this)}
-                >
-                  {
-                    this.state.paused
-                      ?
-                      <Icon
-                        style={styles.resumeIcon}
-                        size={48}
-                        onPress={this._resume.bind(this)}
-                        name="ios-play"
-                      />
-                      :
-                      <Text></Text>
-                  }
-                </TouchableOpacity>
-                : null
-          }
-          <View style={styles.progressBox}>
-            <View style={[styles.progressBar, {width: width * this.state.videoProgress}]}></View>
-          </View>
-        </View>
+        {/*顶部标题栏*/}
+        <Header {...this.props} />
+        {/*视频播放器*/}
+        <VideoPlayer uri={data.video} />
+        {/*评论列表*/}
         <ListView
           // 列表依赖的数据源
           dataSource={this.state.dataSource}
@@ -352,81 +248,6 @@ export default class Detail extends Component {
     />
   }
 
-  _pop() {
-    // 取消压站内容
-    // this.props.navigator.pop();
-    const {navigate} = this.props.navigation;
-    navigate('List');
-  }
-
-  _onLoadStart() {
-  }
-
-  _onLoad() {
-  }
-
-  _onProgress(data) {
-    if (!this.state.videoLoaded) {
-      this.setState({
-        videoLoaded: true
-      })
-    }
-
-    // console.log(data);
-    // total time
-    let duration = data.playableDuration;
-    let currentTime = data.currentTime;
-    // toFixed(2) get 小数点后两位
-    let percent = Number((currentTime / duration).toFixed(2));
-    let newState = {
-      videoTotal: duration,
-      currentTime: Number(data.currentTime.toFixed(2)),
-      videoProgress: percent
-    };
-
-    if (!this.state.videoLoaded) {
-      newState.videoLoaded = true
-    }
-    if (!this.state.playing) {
-      newState.playing = true
-    }
-
-    this.setState(newState);
-  }
-
-  _onEnd() {
-    this.setState({
-      videoProgress: 1,
-      playing: false
-    });
-  }
-
-  _onError(e) {
-    this.setState({
-      videoOk: false
-    });
-  }
-
-  _rePlay() {
-    this.refs.videoPlayer.seek(0)
-  }
-
-  _pause() {
-    if (!this.state.paused) {
-      this.setState({
-        paused: true
-      })
-    }
-  }
-
-  _resume() {
-    if (this.state.paused) {
-      this.setState({
-        paused: false
-      })
-    }
-  }
-
   _focus() {
     this._setModalVisible(true);
   }
@@ -524,125 +345,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     fontSize: 18,
     color: '#ee735c'
-  },
-
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: width,
-    height: 64,
-    paddingTop: 20,
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    backgroundColor: '#fff'
-  },
-
-  backBox: {
-    position: 'absolute',
-    left: 12,
-    top: 32,
-    width: 50,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-
-  headerTitle: {
-    width: width - 120,
-    textAlign: 'center'
-  },
-
-  backIcon: {
-    color: '#999',
-    fontSize: 20,
-    marginRight: 5
-  },
-
-  backText: {
-    color: '#999'
-  },
-
-  videoBox: {
-    width: width,
-    height: width * 0.56,
-    backgroundColor: '#000'
-  },
-
-  video: {
-    width: width,
-    height: width * 0.56,
-    backgroundColor: '#000'
-  },
-
-  loading: {
-    position: 'absolute',
-    left: 0,
-    top: 80,
-    width: width,
-    alignSelf: 'center',
-    backgroundColor: 'transparent'
-  },
-
-  failText: {
-    position: 'absolute',
-    left: 0,
-    top: 90,
-    width: width,
-    textAlign: 'center',
-    color: '#fff',
-    backgroundColor: 'transparent'
-  },
-
-  progressBox: {
-    width: width,
-    height: 2,
-    backgroundColor: '#ccc'
-  },
-
-  progressBar: {
-    width: 1,
-    height: 2,
-    backgroundColor: '#ff6600'
-  },
-
-  playIcon: {
-    position: 'absolute',
-    top: 90,
-    left: width / 2 - 30,
-    width: 60,
-    height: 60,
-    paddingTop: 8,
-    paddingLeft: 22,
-    backgroundColor: 'transparent',
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 30,
-    color: '#ed7b66'
-  },
-
-  pauseBtn: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: width,
-    height: width * 0.56
-  },
-
-  resumeIcon: {
-    position: 'absolute',
-    top: 80,
-    left: width / 2 - 30,
-    width: 60,
-    height: 60,
-    paddingTop: 8,
-    paddingLeft: 22,
-    backgroundColor: 'transparent',
-    borderColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 30,
-    color: '#ed7b66'
   },
 
   infoBox: {
