@@ -1,5 +1,5 @@
 /**
- * 视频播放器 组件
+ * 视频播放器 组件(VideoPlayer)
  */
 import React, {Component} from 'react';
 import {

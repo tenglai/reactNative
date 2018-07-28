@@ -1,5 +1,5 @@
 /**
- * 顶部导航栏 组件
+ * 顶部导航栏 组件(Header)
  */
 import React, {Component} from 'react';
 import {

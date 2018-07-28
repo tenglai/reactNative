@@ -38,9 +38,9 @@ export default class Scroller extends Component {
           onEndReached={this._fetchMoreData.bind(this)}
           // 调用onEndReached之前的临界值，单位是像素。(预加载)
           onEndReachedThreshold={20}
-          // 隐藏右侧滚动条
+          // 是否展示垂直的滚动条
           showsVerticalScrollIndicator={false}
-          // finished warning : in next release ...
+          // 渲染空的区块
           enableEmptySections={true}
           // 自动调整迁移内容
           // 导航栏或标签栏或工具栏不覆盖 Scrollview 内容

@@ -1,5 +1,5 @@
 /**
- * 视频列表页 item 组件
+ * 视频列表页 item 组件(CreationItem)
  */
 import React, {Component} from 'react';
 import {
@@ -33,9 +33,7 @@ export default class CreationItem extends Component {
   }
 
   render() {
-    // let row = this.state.row;
-
-    const { row } = this.props;
+    const { row } = this.state;
 
     return (
       <TouchableHighlight onPress={() => this._loadPage(row)}>

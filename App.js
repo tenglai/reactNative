@@ -20,14 +20,14 @@ import ListScreen from './src/pages/creation/index';
 // 编辑页
 import EditScreen from './src/pages/edit/index';
 // 用户页
-import AccountScreen from './src/pages/acount/index';
+import AccountScreen from './src/pages/account/index';
 // 图片页
 import PictureScreen from './src/pages/picture/index';
 
 // 创建详情页
 import DetailScreen from './src/pages/creation/detail';
 // 登录页
-import LoginScreen from './src/pages/acount/login';
+import LoginScreen from './src/pages/account/login';
 
 // tabbar item
 class TabBarItem extends Component {
