@@ -11,10 +11,12 @@ import {
   AsyncStorage,
   Dimensions,
 } from 'react-native';
-// import CountDown from 'react-native-countdown';
+// 倒计时
+import CountDown from 'react-native-sk-countdown';
+// 按钮
+import Button from 'react-native-button';
 import config from '../../common/config';
 import request from '../../common/request';
-import Button from 'react-native-button';
 
 let width = Dimensions.get("window").width - 20;
 
@@ -22,12 +24,12 @@ export default class Login extends Component {
   constructor() {
     super();
     this.state = {
-      verifyCode: '',
-      phoneNumber: '',
-      codeSent: false,
-      countingDone: false,
-      logined: false,
-      user: null
+      verifyCode: '', // 验证码
+      phoneNumber: '', // 手机号
+      codeSent: false, // 验证码是否发送
+      countingDone: false, // 倒计时是否结束
+      logined: false, // 是否登录过
+      user: null // 用户信息
     }
   }
 
@@ -35,13 +37,10 @@ export default class Login extends Component {
     this._asyncAppStatus();
   }
 
+  // 获取本地存储数据
   _asyncAppStatus() {
-    let that = this;
-    // AsyncStorage is a simple, unencrypted, asynchronous, persistent,
-    // key-value storage system that is global to the app.
-    // It should be used instead of LocalStorage.
-    // static getItem(key: string, callback?: ?(error: ?Error, result: ?string) => void) #
-    // Reads the key field and passes the result to the callback as the second argument
+    let that = this; // 通过 that 拿到 this 上下文
+
     AsyncStorage
       .getItem('user')
       .then((data) => {
@@ -60,12 +59,11 @@ export default class Login extends Component {
       });
   }
 
-  // user -> data.data
+  // 登录以后更新本地存储数据
   _afterLogin(user) {
     let that = this;
     user = JSON.stringify(user);
-    // static setItem(key: string, value: string, callback?: ?(error: ?Error) => void)
-    // Sets the value of the key field and calls the callback function after completion.
+
     AsyncStorage
       .setItem('user', user)
       .then(() => {
@@ -75,6 +73,7 @@ export default class Login extends Component {
         })
       });
 
+    // 跳转账户页面 
     const {navigate} = this.props.navigation;
     if (this.state.logined) {
       navigate('Account');
@@ -84,13 +83,17 @@ export default class Login extends Component {
   render() {
     return (
       <View style={styles.container}>
+        {/*注册*/}
         <View style={styles.signupBox}>
-          <Text style={styles.title}>Login</Text>
+          <Text style={styles.title}>快速登录</Text>
           <TextInput
             style={styles.inputField}
-            placeholder='Input phoneNumber'
+            placeholder='输入手机号'
+            // 不矫正大小写
             autoCapitalize={'none'}
+            // 不矫正内容对错
             autoCorrect={false}
+            // 数字键盘
             keyboardType={'number-pad'}
             onChangeText={(text) => {
               this.setState({
@@ -103,7 +106,7 @@ export default class Login extends Component {
               ?
               <View style={styles.verifyCodeBox}>
                 <TextInput
-                  placeholder='Input VerifyCode'
+                  placeholder='输入验证码'
                   autoCapitalize={'none'}
                   autoCorrect={false}
                   keyboardType={'number-pad'}
@@ -118,21 +121,23 @@ export default class Login extends Component {
                   this.state.countingDone
                     ?
                     <Button
-                        style={styles.recountBtn}
-                        onPress={this._sendVerifyCode.bind(this)}
+                      style={styles.recountBtn}
+                      onPress={this._sendVerifyCode.bind(this)}
                     >
-                      Regain
+                      获取验证码
                     </Button>
                     :
-                    /*<CountDown
-                      onPress={this._countingDone.bind(this)}
-                      text={'seconds:'}
-                      time={2}
-                      buttonStyle={styles.countBtn}
-                      textStyle={{color: '#ccc'}}
-                      disabledTextStyle={{color: '#fff'}}
-                    />*/
-                    null
+                    <CountDown
+                      style={styles.countBtn}
+                      countType='seconds' // 计时类型：seconds / date
+                      auto={true} // 自动开始
+                      afterEnd={this._countingDone} // 结束回调
+                      timeLeft={10} // 正向计时 时间起点为0秒
+                      step={-1} // 计时步长，以秒为单位，正数则为正计时，负数为倒计时
+                      startText='获取验证码' // 开始的文本
+                      endText='获取验证码' // 结束的文本
+                      intervalText={(sec) => '剩余秒数:' + sec} // 定时的文本回调
+                    />
                 }
               </View>
               : null
@@ -144,14 +149,14 @@ export default class Login extends Component {
                 style={styles.btn}
                 onPress={this._submit.bind(this)}
               >
-                Login
+                登录
               </Button>
               :
               <Button
                 style={styles.btn}
                 onPress={this._sendVerifyCode.bind(this)}
               >
-                Get VerifyCode
+                获取验证码
               </Button>
           }
         </View>
@@ -159,53 +164,62 @@ export default class Login extends Component {
     )
   }
 
+  // 获取验证码
   _sendVerifyCode() {
     let that = this;
     let phoneNumber = this.state.phoneNumber;
     if (!phoneNumber) {
-      return Alert.alert('Cell phone number cannot be empty');
+      return Alert.alert('手机号不能为空!');
     }
+    // 表单主体
     let body = {
       phoneNumber: phoneNumber
     };
+    // 接口
     let signupURL = config.api.base + config.api.signup;
-
+    // 请求验证码
     request.post(signupURL, body)
       .then((data) => {
         if (data && data.success) {
+          // 显示输入验证码的输入框
           that._showVerifyCode();
         } else {
-          Alert.alert('Authenticode failed 1');
+          Alert.alert('获取验证码失败,请检查手机号是否正确');
         }
       })
       .catch(function (err) {
-        Alert.alert('Authenticode failed 2');
+        Alert.alert('获取验证码失败,请检查网络是否良好');
       })
   }
 
+  // 显示输入验证码的输入框
   _showVerifyCode() {
     this.setState({
       codeSent: true
     })
   }
 
+  // 倒计时结束
   _countingDone() {
     this.setState({
       countingDone: true
     })
   }
 
+  // 登录
   _submit() {
     let that = this;
     let phoneNumber = this.state.phoneNumber;
     let verifyCode = this.state.verifyCode;
     if (!phoneNumber || !verifyCode) {
-      return Alert.alert('Cell phone number and verification code cannot be empty');
+      return Alert.alert('手机号或验证码不能为空!');
     }
+    // 参数
     let body = {
       phoneNumber: phoneNumber,
       verifyCode: verifyCode
     };
+    // 接口
     let verifyURL = config.api.base + config.api.verify;
 
     request.post(verifyURL, body)
@@ -231,15 +245,18 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f9f9f9',
   },
+  // 注册
   signupBox: {
     marginTop: 30
   },
+  // 标题
   title: {
     marginBottom: 20,
     fontSize: 20,
     textAlign: 'center',
     color: '#333'
   },
+  // 输入框的样式
   inputField: {
     width: width,
     height: 40,
@@ -259,11 +276,13 @@ const styles = StyleSheet.create({
     color: '#666',
     backgroundColor: '#fff'
   },
+  // 验证码
   verifyCodeBox: {
     marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
+  // 倒计时按钮样式
   countBtn: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -283,6 +302,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#ee735c'
   },
+  // 获取验证码 按钮 样式
   btn: {
     marginTop: 10,
     padding: 10,

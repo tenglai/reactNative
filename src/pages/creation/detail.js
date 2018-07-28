@@ -6,14 +6,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
   ActivityIndicator,
-  TouchableOpacity,
-  Image,
   ListView,
-  TextInput,
-  Modal,
-  Alert,
 } from 'react-native';
 // 顶部导航栏
 import Header from '../../components/Header';
@@ -27,13 +21,11 @@ import CommentListHeader from '../../components/CommentListHeader';
 import config from '../../common/config';
 import request from '../../common/request';
 
-let { width } = Dimensions.get("window");
 let cachedResults = {
   nextPage: 1,
   items: [],
   total: 0
 };
-
 
 export default class Detail extends Component {
   constructor(props) {
