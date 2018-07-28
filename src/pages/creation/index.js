@@ -82,14 +82,16 @@ export default class List extends Component {
   _fetchData(page) {
     let that = this;
 
-    if (page !== 0) {
+    if (page !== 0) { // 加载更多操作
       this.setState({
         isLoadingTail: true
       });
-    } else {
+    } else { // 刷新操作
       this.setState({
         isRefreshing: true
       });
+      // 初始哈 nextPage
+      cachedResults.nextPage = 1;
     }
 
     request
@@ -101,25 +103,25 @@ export default class List extends Component {
         if (data.success) {
           // 保存原数据
           let items = cachedResults.items.slice();
-          if (page !== 0) {
+          if (page !== 0) { // 加载更多操作
             // 数组拼接
             items = items.concat(data.data);
             cachedResults.nextPage += 1;
-          } else {
+          } else { // 刷新操作
             // 数据不变
-            items = data.data.concat(items);
+            items = data.data;
           }
 
           cachedResults.items = items; // 视频列表数据
           cachedResults.total = data.total; // 总数
 
           setTimeout(function () {
-            if (page !== 0) {
+            if (page !== 0) { // 加载更多操作
               that.setState({
                 isLoadingTail: false,
                 dataSource: that.state.dataSource.cloneWithRows(cachedResults.items)
               });
-            } else {
+            } else { // 刷次操作
               that.setState({
                 isRefreshing: false,
                 dataSource: that.state.dataSource.cloneWithRows(cachedResults.items)
@@ -129,12 +131,12 @@ export default class List extends Component {
         }
       })
       .catch((error) => {
-        if (page !== 0) {
+        if (page !== 0) { // 上拉加载更多操作
           this.setState({
             isLoadingTail: false
           });
         } else {
-          this.setState({
+          this.setState({ // 刷新操作
             isRefreshing: false
           });
         }

@@ -22,6 +22,7 @@ export default class Scroller extends Component {
 
   render() {
     const { dataSource, renderRow, isRefreshing } = this.props;
+    // console.log(this.props);
 
     return (
       <View style={styles.container}>
@@ -64,6 +65,7 @@ export default class Scroller extends Component {
    * 下拉刷新
    */
   _onRefresh() {
+    // console.log('下拉刷新');
     if (this.props.isRefreshing || !this._hasMore()) {
       return
     }
@@ -76,6 +78,7 @@ export default class Scroller extends Component {
    * 上拉加载更多
    */
   _fetchMoreData() {
+    // console.log('上拉加载更多');
     /**
      * this._hasMore() 验证还有更多数据
      * isLoadingTail true/false 加载动画(菊花图)
