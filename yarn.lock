@@ -4231,6 +4231,13 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-addons-update@^15.6.2:
+  version "15.6.2"
+  resolved "http://registry.npm.taobao.org/react-addons-update/download/react-addons-update-15.6.2.tgz#e53753c5b34887974510c882d7fb075851d5e504"
+  dependencies:
+    fbjs "^0.8.9"
+    object-assign "^4.1.0"
+
 react-clone-referenced-element@^1.0.1:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/react-clone-referenced-element/download/react-clone-referenced-element-1.0.1.tgz#2bba8c69404c5e4a944398600bcc4c941f860682"
@@ -4259,12 +4266,6 @@ react-native-button@^2.3.0:
   resolved "http://registry.npm.taobao.org/react-native-button/download/react-native-button-2.3.0.tgz#7d0a90095d415b0edf98a904556a7c4439646568"
   dependencies:
     prop-types "^15.5.10"
-
-react-native-countdown@^0.0.3:
-  version "0.0.3"
-  resolved "http://registry.npm.taobao.org/react-native-countdown/download/react-native-countdown-0.0.3.tgz#50b5254294fb5da866f8913a9398f495f886534a"
-  dependencies:
-    react-timer-mixin "^0.13.3"
 
 react-native-dismiss-keyboard@1.0.0:
   version "1.0.0"
@@ -4303,10 +4304,6 @@ react-native-safe-area-view@^0.8.0:
   resolved "http://registry.npm.taobao.org/react-native-safe-area-view/download/react-native-safe-area-view-0.8.0.tgz#22d78cb8e8658d04a10cd53c1546e0bc86cb7aea"
   dependencies:
     hoist-non-react-statics "^2.3.1"
-
-react-native-sk-countdown@^1.0.1:
-  version "1.0.1"
-  resolved "http://registry.npm.taobao.org/react-native-sk-countdown/download/react-native-sk-countdown-1.0.1.tgz#e467bac16949060faa3a7c0db56d460ff8420451"
 
 react-native-tab-view@^0.0.77:
   version "0.0.77"
@@ -4452,7 +4449,7 @@ react-test-renderer@16.4.1:
     prop-types "^15.6.0"
     react-is "^16.4.1"
 
-react-timer-mixin@^0.13.2, react-timer-mixin@^0.13.3:
+react-timer-mixin@^0.13.2:
   version "0.13.4"
   resolved "http://registry.npm.taobao.org/react-timer-mixin/download/react-timer-mixin-0.13.4.tgz#75a00c3c94c13abe29b43d63b4c65a88fc8264d3"
 

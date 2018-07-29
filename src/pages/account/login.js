@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from 'react-native';
 // 倒计时
-import CountDown from 'react-native-sk-countdown';
+import { CountDownText } from '../../components/CountDown';
 // 按钮
 import Button from 'react-native-button';
 import config from '../../common/config';
@@ -57,27 +57,6 @@ export default class Login extends Component {
         }
         that.setState(newState);
       });
-  }
-
-  // 登录以后更新本地存储数据
-  _afterLogin(user) {
-    let that = this;
-    user = JSON.stringify(user);
-
-    AsyncStorage
-      .setItem('user', user)
-      .then(() => {
-        that.setState({
-          logined: true,
-          user: user
-        })
-      });
-
-    // 跳转账户页面 
-    const {navigate} = this.props.navigation;
-    if (this.state.logined) {
-      navigate('Account');
-    }
   }
 
   render() {
@@ -127,11 +106,11 @@ export default class Login extends Component {
                       获取验证码
                     </Button>
                     :
-                    <CountDown
+                    <CountDownText
                       style={styles.countBtn}
                       countType='seconds' // 计时类型：seconds / date
                       auto={true} // 自动开始
-                      afterEnd={this._countingDone} // 结束回调
+                      afterEnd={() => this._countingDone()} // 结束回调
                       timeLeft={10} // 正向计时 时间起点为0秒
                       step={-1} // 计时步长，以秒为单位，正数则为正计时，负数为倒计时
                       startText='获取验证码' // 开始的文本
@@ -225,16 +204,37 @@ export default class Login extends Component {
     request.post(verifyURL, body)
       .then((data) => {
         if (data && data.success) {
-          // Pass to father(index.ios.js)
-          // that.props.afterLogin(data.data);
+          // 获取用户信息后，页面跳转
           that._afterLogin(data.data);
         } else {
-          Alert.alert('Authenticode failed 3');
+          Alert.alert('登录失败,请稍后重试!');
         }
       })
       .catch((err) => {
-        Alert.alert('Authenticode failed 4');
+        Alert.alert('获取用户信息失败!');
       });
+  }
+
+  // 登录以后更新本地存储数据
+  _afterLogin(user) {
+    let that = this;
+    user = JSON.stringify(user);
+
+    AsyncStorage
+      .setItem('user', user)
+      .then(() => {
+        that.setState({
+          logined: true,
+          user: user
+        })
+      });
+
+    // 跳转账户页面 
+    const {navigate} = this.props.navigation;
+    // if (this.state.logined) {
+    //   navigate('Account');
+    // }
+    navigate('Account');
   }
 }
 
@@ -285,11 +285,13 @@ const styles = StyleSheet.create({
   // 倒计时按钮样式
   countBtn: {
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
     width: 100,
     borderColor: '#ee735c',
     borderRadius: 4,
-    backgroundColor: '#ee735c'
+    backgroundColor: '#ee735c',
+    paddingTop: 10,
+    paddingLeft: 10
   },
   recountBtn: {
     height: 40,
@@ -300,7 +302,8 @@ const styles = StyleSheet.create({
     width: 100,
     borderColor: '#ee735c',
     borderRadius: 4,
-    backgroundColor: '#ee735c'
+    backgroundColor: '#ee735c',
+    paddingTop: 10
   },
   // 获取验证码 按钮 样式
   btn: {
