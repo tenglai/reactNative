@@ -175,8 +175,8 @@ const Navigator = createStackNavigator(
     }
   },
   {
-    initialRouteName: 'Login'
-    // initialRouteName: 'Tab' // 默认出现的Tab页面
+    // initialRouteName: 'Login'
+    initialRouteName: 'Tab' // 默认出现的Tab页面
   }
 );
 

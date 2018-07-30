@@ -1,5 +1,5 @@
 /**
- * 账号页面
+ * 账户头像 组件
  */
 import React, {Component} from 'react';
 import {
@@ -14,57 +14,54 @@ import {
   View,
   Dimensions,
 } from 'react-native';
+// 图标
 import Icon from 'react-native-vector-icons/Ionicons';
 // 选择手机相册
 import ImagePicker from 'react-native-image-picker';
+// 请求配置文件
 import config from '../../common/config';
 import request from '../../common/request';
+// 用于加密签名
 import sha1 from 'sha1';
 import * as Progress from 'react-native-progress';
 
 // 获取屏幕宽度
 const {width} = Dimensions.get('window');
 
+// 上传头像的基础配置
 let pickPhotoOptions = {
-  title: 'Select Avatar',
-  cancelButtonTitle: 'Cancel',
-  takePhotoButtonTitle: 'Photo',
-  chooseFromLibraryButtonTitle: 'From album...',
-  customButtons: [
+  title: '选择头像',
+  cancelButtonTitle: '取消',
+  takePhotoButtonTitle: '拍照',
+  chooseFromLibraryButtonTitle: '选择相册',
+  customButtons: [ // 自定义按钮
     {
-      name: 'vip',
-      title: 'Go RN VIP Forum'
+      name: '自定义name',
+      title: '自定义title'
     }
   ],
-  quality: 0.8,
-  allowsEditing: true,
-  noData: false,
+  quality: 0.8, // 图片质量
+  allowsEditing: true, // 是否允许内置功能对照片进行拉伸、剪裁操作
+  noData: false, // 图片转成base64
   storageOptions: {
     skipBackup: true,
     path: 'images'
   }
 };
-// const CLOUDINARY = {
-//   cloud_name: 'mybaby',
-//   api_key: '658556635518849',
-//   api_secret: 'GxyumaJ1f_qcAhUPTC384yuseSY',
-//   base: 'https://res.cloudinary.com/mybaby',
-//   image: 'https://api.cloudinary.com/v1_1/mybaby/image/upload',
-//   video: 'https://api.cloudinary.com/v1_1/mybaby/video/upload',
-//   audio: 'https://api.cloudinary.com/v1_1/mybaby/raw/upload',
-// };
+
+// Cloudinary图床配置信息
 const CLOUDINARY = {
   cloud_name: 'dlwilyjng',
   api_key: '499135353216869',
   api_secret: 'KK0FxUTpBmXtom8BArBo6M0Oarc',
   base: 'https://res.cloudinary.com/dlwilyjng',
+  // 上传地址
   image: 'https://api.cloudinary.com/v1_1/dlwilyjng/image/upload',
   video: 'https://api.cloudinary.com/v1_1/dlwilyjng/video/upload',
   audio: 'https://api.cloudinary.com/v1_1/dlwilyjng/raw/upload',
 };
 
-
-export default class Account extends Component {
+export default class AccountAvatar extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -72,25 +69,11 @@ export default class Account extends Component {
       user: null,
       avatarProgress: 0,
       avatarUploading: false,
-      // none slide fade
-      animationType: 'fade',
-      // Whether modal scenes are visible
-      modalVisible: false,
-      // Transparent display
-      transparent: false,
     };
 
     this._asyncGetAppStatus = this._asyncGetAppStatus.bind(this);
     this._pickPhoto = this._pickPhoto.bind(this);
     this._uploadToCloud = this._uploadToCloud.bind(this);
-    this._asyncUpdateUser = this._asyncUpdateUser.bind(this);
-    this._editAccount = this._editAccount.bind(this);
-    this._setModalVisible = this._setModalVisible.bind(this);
-    this._startShow = this._startShow.bind(this);
-    this._closeModal = this._closeModal.bind(this);
-    this._changeUserInfo = this._changeUserInfo.bind(this);
-    this._saveUserInfo = this._saveUserInfo.bind(this);
-    this._logout = this._logout.bind(this);
   }
 
   render() {
@@ -106,7 +89,7 @@ export default class Account extends Component {
           <Text onPress={this._editAccount} style={styles.toolBarEdit}>Edit</Text>
         </View>
 
-        {/* If the user's avatar will display the user's avatar, if not, now add the user avatar icon */}
+        {/* 如果用户头像存在则显示，否则添加头像Icon */}
         {
           user.avatar ?
           <TouchableOpacity
@@ -166,138 +149,13 @@ export default class Account extends Component {
             </TouchableOpacity>
           </View>
         }
-        <Modal
-          animationType={this.state.animationType}
-          transparent={this.state.transparent}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {
-            this._setModalVisible(false)
-          }}
-          onShow={this._startShow}
-        >
-          <View style={styles.modalContainer}>
-            <Icon
-              name='ios-close-outline'
-              size={45}
-              onPress={this._closeModal}
-              style={styles.closeIcon}
-            />
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>Nickname</Text>
-              <TextInput
-                placeholder='Please enter your nickname'
-                placeholderTextColor='blue'
-                underlineColorAndroid='transparent'
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                style={styles.inputField}
-                defaultValue={user.nickname}
-                onChangeText={(text) => {
-                  this._changeUserInfo('nickname', text);
-                }}
-              />
-            </View>
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>Age</Text>
-              <TextInput
-                placeholder='Please enter your age'
-                placeholderTextColor='blue'
-                underlineColorAndroid='transparent'
-                autoCorrect={false}
-                autoCapitalize={'none'}
-                style={styles.inputField}
-                defaultValue={user.age}
-                onChangeText={(text) => {
-                  this._changeUserInfo('age', text);
-                }}
-              />
-            </View>
-            <View style={styles.fieldItem}>
-              <Text style={styles.label}>Gender</Text>
-              <Icon.Button
-                name="ios-paw"
-                onPress={() => {
-                  this._changeUserInfo('gender', 'male')
-                }}
-                style={[
-                  styles.gender,
-                  user.gender === 'male' && styles.genderChecked
-                ]}
-              >
-                Male
-              </Icon.Button>
-              <Icon.Button
-                name="ios-paw"
-                onPress={() => {
-                  this._changeUserInfo('gender', 'female')
-                }}
-                style={[
-                  styles.gender,
-                  user.gender === 'female' && styles.genderChecked
-                ]}
-              >
-                Female
-              </Icon.Button>
-            </View>
-            <View style={styles.btn}>
-              <Text style={styles.btnText} onPress={this._saveUserInfo}>Save</Text>
-            </View>
-          </View>
-        </Modal>
-        <View style={styles.btn}>
-          <Text
-            style={styles.btnText}
-            onPress={this._logout.bind(this)}
-          >
-            Log out
-          </Text>
-        </View>
       </View>
     );
   }
 
-  _logout() {
-    // Empty the local user store to change the entire app's login status
-    // alert('logout');
-    // this.props.logout();
-    const {navigate} = this.props.navigation;
-    navigate('Login');
-    // this.props.logout();
-  }
-
-  _saveUserInfo() {
-    this._asyncUpdateUser();
-  }
-
-  _changeUserInfo(key, value) {
-    // console.log('key---'+key+'--value-'+value);
-    let user = this.state.user;
-    user[key] = value;
-    console.log('Change' + JSON.stringify(user));
-    this.setState({
-      user: user
-    });
-  }
-
-  _setModalVisible(visible) {
-    this.setState({modalVisible: visible});
-  }
-
-  _startShow() {
-    console.log('Start showing modal');
-  }
-
-  _closeModal() {
-    this._setModalVisible(false);
-  }
-
-  _editAccount() {
-    // alert('弹出modal');
-    this._setModalVisible(true);
-  }
-
+  // 上传头像
   _pickPhoto() {
-    // react-native-image-picker copy!
+    // 选择图片
     ImagePicker.showImagePicker(pickPhotoOptions, (response) => {
       console.log('Response = ', response);
       if (response.didCancel) {
@@ -305,20 +163,20 @@ export default class Account extends Component {
       } else if (response.error) {
         console.log('ImagePicker Error: ', response.error);
       } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
+        console.log('用户点击自定义按钮: ', response.customButton);
       } else {
-        // You can display the image using either data...
+        // 可以使用任何数据显示图像
         // const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
-        // First Scenario
-        // Base64 when we need to upload pictures
+        // 第一种方案
+        // 当我们需要上传图片 使用 Base64
         let avatarUri = 'data:image/jpeg;base64,' + response.data;
-        // Start uploading image servers
-        // Generate signatures on your own server
-        let timestamp = Date.now();
-        let tags = 'app,avatar';
-        let folder = 'avatar';
-        let accessToken = this.state.user.accessToken;
-        let signatureUrl = config.api.base + config.api.signature;
+        // 开始上传图像服务器
+        // 在自己的服务器上生成签名
+        let timestamp = Date.now(); // 时间戳
+        let tags = 'app,avatar'; // 标签
+        let folder = 'avatar'; // 对应图床下的文件夹
+        let accessToken = this.state.user.accessToken; // 用户标识
+        let signatureUrl = config.api.base + config.api.signature; // 获取签名的地址
 
         request
           .post(signatureUrl, {
@@ -329,27 +187,26 @@ export default class Account extends Component {
           })
           .then((data) => {
             if (data && data.success) {
-              // data.data : Is the signature that the server generated for us.
-              console.log('The signature generated by the server-' + data.data);
-              // Generate signatures locally
+              // data.data 是服务器为我们生成的签名
+              console.log('服务器生成的签名:' + data.data);
+              // 在本地生成签名
               let signature = 'folder=' + folder
                   + '&tags=' + tags
-                  + '&timestamp=' + timestamp
-                  + CLOUDINARY.api_secret;
-              // sha1 encryption
+                  + '&timestamp=' + timestamp + CLOUDINARY.api_secret;
+              // sha1 加密
               signature = sha1(signature);
-              console.log('Server-generated signatures：' + signature);
+              // console.log('服务器生成签名:' + signature);
 
-              // Start post to graph bed
+              // 通过 formData 形式发送请求
               let body = new FormData();
               body.append('folder', folder);
               body.append('tags', tags);
               body.append('api_key', CLOUDINARY.api_key);
               body.append('signature', signature);
-              body.append('resource_type', 'image');
-              body.append('file', avatarUri);
-              body.append('timestamp', timestamp);
-
+              body.append('resource_type', 'image'); // 媒体类型
+              body.append('file', avatarUri); // 图片数据
+              body.append('timestamp', timestamp); // 时间戳
+              // 上传 Cloudinary图床
               this._uploadToCloud(body);
             }
           })
@@ -360,6 +217,7 @@ export default class Account extends Component {
     });
   }
 
+  // 上传 Cloudinary图床
   _uploadToCloud(body) {
     let uploadRequest = new XMLHttpRequest();
     let url = CLOUDINARY.image;
@@ -390,7 +248,7 @@ export default class Account extends Component {
       }
 
       if (response && response.public_id) {
-        // Update our view
+        // 更新视图
         let user = this.state.user;
         // https://res.cloudinary.com/mybaby
         // /image/upload/v1477463217/avatar/e7g5cpfbxtjjrxsbirbp.jpg
@@ -424,6 +282,7 @@ export default class Account extends Component {
     }
   }
 
+  // 更新本地缓存用户信息
   _asyncUpdateUser() {
     // Update user information to: own server local
     let user = this.state.user;
@@ -458,6 +317,7 @@ export default class Account extends Component {
     this._asyncGetAppStatus();
   }
 
+  // 获取应用状态
   _asyncGetAppStatus() {
     // 从本地缓存中获取用户信息
     AsyncStorage
@@ -551,59 +411,5 @@ const styles = StyleSheet.create({
     color: '#666',
     backgroundColor: '#fff',
     borderRadius: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-    paddingTop: 50,
-  },
-  closeIcon: {
-    alignSelf: 'center',
-    fontSize: 30,
-    color: 'red'
-  },
-  fieldItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 50,
-    paddingLeft: 15,
-    paddingRight: 15,
-    borderColor: '#ee735d',
-    borderBottomWidth: 1,
-  },
-  label: {
-    color: '#ccc',
-    marginRight: 10,
-    textAlign: 'center',
-  },
-  inputField: {
-    flex: 1,
-    height: 50,
-    fontSize: 14,
-    color: '#666'
-  },
-  gender: {
-    backgroundColor: '#ccc'
-  },
-  genderChecked: {
-    backgroundColor: '#ee735d'
-  },
-  btn: {
-    height: 50,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#ee735d',
-    marginTop: 25,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  btnText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ee735d'
-  },
+  }
 });
