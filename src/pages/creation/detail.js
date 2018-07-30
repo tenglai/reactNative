@@ -17,6 +17,8 @@ import VideoPlayer from '../../components/VideoPlayer';
 import CommentItem from '../../components/CommentItem';
 // 评论列表页 头部
 import CommentListHeader from '../../components/CommentListHeader';
+// 下拉刷新/上拉加载更多 组件
+import PageListView from '../../components/PageListView';
 
 import config from '../../common/config';
 import request from '../../common/request';
@@ -44,6 +46,8 @@ export default class Detail extends Component {
 
   componentDidMount() {
     this._fetchData();
+    // 20170730
+    // this._refresh();
   }
 
   _hasMore() {
@@ -94,6 +98,37 @@ export default class Detail extends Component {
       });
   }
 
+  _renderRow(row) {
+    return (
+      <CommentItem row={row} />
+    )
+  }
+
+  _renderHeader() {
+    let data = this.state.data;
+    return (
+      <CommentListHeader data={data} />
+    )
+  }
+
+  _renderFooter() {
+    if (!this._hasMore() && cachedResults.items.total !== 0) {
+      return (
+        <View style={styles.loadingMore}>
+          <Text style={styles.loadingText}>No More!</Text>
+        </View>
+      )
+    }
+
+    if (!this.state.isLoadingTail) {
+      return <View style={styles.loadingMore}/>
+    }
+
+    return <ActivityIndicator
+      style={styles.loadingMore}
+    />
+  }
+
   render() {
     // let data = this.props.data;
     const {params} = this.props.navigation.state;
@@ -125,40 +160,76 @@ export default class Detail extends Component {
           // 控制是否调整内容（消除小空白）
           automaticallyAdjustContentInsets={false}
         />
+
+        {/*<PageListView 
+          pageLen={10} 
+          renderRow={this._renderRow.bind(this)}
+          refresh={this._refresh.bind(this)} 
+          loadMore={this._loadMore.bind(this)} 
+        />*/}
       </View>
     )
   }
 
-  _renderRow(row) {
-    return (
-      <CommentItem row={row} />
-    )
-  }
+  // // 20180730 刷新
+  // _refresh(callBack){
+  //   // fetch(分页接口url+'?page=1')
+  //   //   .then((response)=>response.json())
+  //   //   .then((responseData)=>{
+  //   //     //根据接口返回结果得到数据数组
+  //   //     let arr=responseData.result;
+  //   //     callBack(arr);
+  //   //   });
 
-  _renderHeader() {
-    let data = this.state.data;
-    return (
-      <CommentListHeader data={data} />
-    )
-  }
+  //   request
+  //     .get(config.api.base + config.api.comment, {
+  //       accessToken: 'abc',
+  //       page: 1,
+  //       creation: '123'
+  //     })
+  //     .then((data) => {
+  //         //根据接口返回结果得到数据数组
+  //         let arr = data.data;
+  //         callBack(arr);
+  //     })
+  //     .catch((error) => {
+  //       console.log('请求失败!');
+  //     })
+  // }
 
-  _renderFooter() {
-    if (!this._hasMore() && cachedResults.items.total !== 0) {
-      return (
-        <View style={styles.loadingMore}>
-          <Text style={styles.loadingText}>No More!</Text>
-        </View>
-      )
-    }
+  // // 20180730 加载更多
+  // _loadMore(page,callBack){
+  //   // fetch(分页接口url+'?page='+page)
+  //   //   .then((response)=>response.json())
+  //   //   .then((responseData)=>{
+  //   //     //根据接口返回结果得到数据数组
+  //   //     let arr=responseData.result;
+  //   //     callBack(arr);
+  //   //   });
 
-    if (!this.state.isLoadingTail) {
-      return <View style={styles.loadingMore}/>
-    }
+  //   request
+  //     .get(config.api.base + config.api.comment, {
+  //       accessToken: 'abc',
+  //       page: page,
+  //       creation: '123'
+  //     })
+  //     .then((data) => {
+  //         //根据接口返回结果得到数据数组
+  //         let arr = data.data;
+  //         callBack(arr);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     })
+  // }
 
-    return <ActivityIndicator
-      style={styles.loadingMore}
-    />
-  }
+  // // 20180730 子组件渲染
+  // _renderRow(row) {
+  //   return (
+  //     <CommentItem row={row} />
+  //   )
+  // }
+  
 }
 
 
