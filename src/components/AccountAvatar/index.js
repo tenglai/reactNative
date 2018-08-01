@@ -91,17 +91,12 @@ export default class AccountAvatar extends Component {
 
   render() {
     let user = this.state.user;
-    if (!user) {
-      return <View/>
-    }
+    // if (!user) {
+    //   return <View/>
+    // }
 
     return (
       <View style={styles.container}>
-        <View style={styles.toolBar}>
-          <Text style={styles.toolBarText}>我的账户</Text>
-          <Text onPress={this._editAccount} style={styles.toolBarEdit}>Edit</Text>
-        </View>
-
         {/* 如果用户头像存在则显示，否则添加头像Icon */}
         {
           user.avatar ?
@@ -167,6 +162,36 @@ export default class AccountAvatar extends Component {
         }
       </View>
     );
+  }
+
+  // 生命周期--组件挂载完毕
+  componentDidMount() {
+    this._asyncGetAppStatus();
+  }
+
+  // 获取应用状态
+  _asyncGetAppStatus() {
+    // 从本地缓存中获取用户信息
+    AsyncStorage
+      .getItem('user')
+      .then((data) => {
+        let user;
+        let newState = {};
+        if (data) {
+          user = JSON.parse(data);
+        }
+        if (user && user.accessToken) {
+          newState.logined = true;
+          newState.user = user;
+          // newState.user.avatar = '';
+        } else {
+          newState.logined = false;
+        }
+        this.setState(newState);
+      })
+      .catch((err) => {
+        alert(err);
+      });
   }
 
   // 上传头像
@@ -333,35 +358,6 @@ export default class AccountAvatar extends Component {
       })
       .catch((err) => {
         console.log(err);
-      });
-  }
-
-  componentDidMount() {
-    this._asyncGetAppStatus();
-  }
-
-  // 获取应用状态
-  _asyncGetAppStatus() {
-    // 从本地缓存中获取用户信息
-    AsyncStorage
-      .getItem('user')
-      .then((data) => {
-        let user;
-        let newState = {};
-        if (data) {
-          user = JSON.parse(data);
-        }
-        if (user && user.accessToken) {
-          newState.logined = true;
-          newState.user = user;
-          // newState.user.avatar = '';
-        } else {
-          newState.logined = false;
-        }
-        this.setState(newState);
-      })
-      .catch((err) => {
-        alert(err);
       });
   }
 }

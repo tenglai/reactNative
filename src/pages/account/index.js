@@ -6,37 +6,47 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
+  AsyncStorage,
+  TouchableOpacity,
 } from 'react-native';
-
-// 获取屏幕宽度
-const {width} = Dimensions.get('window');
+// 顶部标题栏 组件
+import AccountHeader from '../../components/AccountHeader';
+// 头像 组件
+import AccountAvatar from '../../components/AccountAvatar';
 
 export default class Account extends Component {
   constructor(props) {
     super(props);
     this.state = {
       logined: false,
-      user: null
+      user: {
+        nickname: '狗狗',
+        bread: '柯基',
+        age: '12',
+        gender: 'male'
+      }
     };
   }
 
   render() {
     let user = this.state.user;
-    if (!user) {
-      return <View/>
-    }
+    // if (!user) {
+    //   return <View/>
+    // }
 
     return (
       <View style={styles.container}>
-        <View style={styles.btn}>
-          <Text
-            style={styles.btnText}
-            onPress={this._logout.bind(this)}
-          >
-            退出登录
-          </Text>
-        </View>
+        {/*顶部标题栏*/}
+        <AccountHeader user={this.state.user} />
+        {/*头像*/}
+        <AccountAvatar />
+        {/*退出登录*/}
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={this._logout.bind(this)}
+        >
+          <Text style={styles.btnText}>退出登录</Text>
+        </TouchableOpacity>
       </View>
     );
   }
