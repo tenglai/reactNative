@@ -23,6 +23,7 @@ import config from '../../common/config';
 import request from '../../common/request';
 // 用于加密签名
 import sha1 from 'sha1';
+// 进度 组件
 import * as Progress from 'react-native-progress';
 
 // 获取屏幕宽度
@@ -60,6 +61,18 @@ const CLOUDINARY = {
   video: 'https://api.cloudinary.com/v1_1/dlwilyjng/video/upload',
   audio: 'https://api.cloudinary.com/v1_1/dlwilyjng/raw/upload',
 };
+
+function avatar(id, type) {
+  if(id.indexOf('http') > -1) {
+    return id;
+  }
+
+  if(id.indexOf('data:image') > -1) {
+    return id;
+  }
+
+  return CLOUDINARY.base + '/' + type + '/upload/' + id
+}
 
 export default class AccountAvatar extends Component {
   constructor(props) {
@@ -106,9 +119,12 @@ export default class AccountAvatar extends Component {
                   this.state.avatarUploading
                   ?
                   <Progress.Circle
+                    // 尺寸
                     size={75}
+                    // 是否显示文本
                     showsText={true}
                     color={'#ee735d'}
+                    // 进度值
                     progress={this.state.avatarProgress}
                   />
                   :
@@ -239,6 +255,7 @@ export default class AccountAvatar extends Component {
 
       let response;
       let responseText;
+      // 捕获异常
       try {
         responseText = uploadRequest.responseText;
         console.log('The graph bed server returns the:' + responseText);
@@ -259,6 +276,7 @@ export default class AccountAvatar extends Component {
         console.log('Post the address of the graph bed:' + cloudUrl);
         user.avatar = cloudUrl;
 
+        // 更改状态
         this.setState({
           user: user,
           avatarUploading: false,
@@ -269,10 +287,11 @@ export default class AccountAvatar extends Component {
       }
     };
 
-    // Get the progress data for the uploaded image
+    // 获取上传图片进度
     if (uploadRequest.upload) {
       uploadRequest.upload.onprogress = (event) => {
         if (event.lengthComputable) {
+          // 进度(0-1)
           let percent = Number((event.loaded / event.total).toFixed(2));
           this.setState({
             avatarProgress: percent
@@ -284,28 +303,32 @@ export default class AccountAvatar extends Component {
 
   // 更新本地缓存用户信息
   _asyncUpdateUser() {
-    // Update user information to: own server local
+    let that = this;
+    // 将用户信息更新到：自己的服务器本地
     let user = this.state.user;
-    console.log('Start synchronizing user information:' + JSON.stringify(user));
+    console.log('开始同步用户信息:' + JSON.stringify(user));
 
     AsyncStorage
       .setItem('user', JSON.stringify(user))
       .then(() => {
-        console.log('Update Local success');
+        console.log('更新本地成功');
       })
       .catch((err) => {
         console.log(err);
       });
 
-    // Update your own server
+    // 更新自己的服务器
     let url = config.api.base + config.api.update;
     request
       .post(url, user)
       .then((data) => {
         if (data && data.success) {
-          alert('Update user information to server success');
-          // Do it yourself, update the user state from the data returned by the server
-          this._closeModal();
+          // alert('将用户信息更新到服务器成功');
+          // 从服务器返回的数据更新用户状态
+          // this._closeModal();
+          that.setState({
+            user: ''
+          })
         }
       })
       .catch((err) => {

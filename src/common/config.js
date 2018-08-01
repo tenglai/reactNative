@@ -18,14 +18,14 @@ module.exports = {
   },
   // 请求接口地址
   api: {
-    base: 'http://rap.taobao.org/mockjs/14179/',
+    base: 'http://rap.taobao.org/mockjs/14179/', // 根路径
     creations: 'api/creation', // 视频列表
-    comment: 'api/comments',
+    comment: 'api/comments', // 评论列表
     up: 'api/up', // 点赞操作
-    video: 'api/creations/video',
-    signup: 'api/u/signup',
-    verify: 'api/u/verify',
-    update: 'api/u/update',
-    signature: 'api/signature'
+    video: 'api/creations/video', // 视频
+    signup: 'api/u/signup', // 签名接口
+    verify: 'api/u/verify', // 验证码
+    update: 'api/u/update', // 上传头像
+    signature: 'api/signature' // 签名
   }
 };
