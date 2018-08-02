@@ -183,7 +183,7 @@ export default class AccountAvatar extends Component {
         if (user && user.accessToken) {
           newState.logined = true;
           newState.user = user;
-          // newState.user.avatar = '';
+          newState.user.avatar = '';
         } else {
           newState.logined = false;
         }

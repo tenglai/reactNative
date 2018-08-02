@@ -51,6 +51,19 @@ export default class Account extends Component {
     );
   }
 
+  // 生命周期--组件将要挂载
+  componentWillMount() {
+    let user = {
+      nickname: '狗狗',
+      bread: '柯基',
+      age: '12',
+      gender: 'male',
+      accessToken: '123456'
+    };
+    AsyncStorage.setItem('user',JSON.stringify(user));
+  }
+
+  // 注销登录
   _logout() {
     // 清空用户信息
     AsyncStorage.removeItem('user');
