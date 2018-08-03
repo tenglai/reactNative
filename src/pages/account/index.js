@@ -23,7 +23,8 @@ export default class Account extends Component {
         nickname: '狗狗',
         bread: '柯基',
         age: '12',
-        gender: 'male'
+        gender: 'male',
+        avatar: ''
       }
     };
   }
@@ -39,7 +40,7 @@ export default class Account extends Component {
         {/*顶部标题栏*/}
         <AccountHeader user={this.state.user} />
         {/*头像*/}
-        <AccountAvatar />
+        <AccountAvatar user={this.state.user} />
         {/*退出登录*/}
         <TouchableOpacity
           style={styles.btn}

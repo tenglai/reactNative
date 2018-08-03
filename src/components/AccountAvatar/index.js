@@ -35,12 +35,12 @@ let pickPhotoOptions = {
   cancelButtonTitle: '取消',
   takePhotoButtonTitle: '拍照',
   chooseFromLibraryButtonTitle: '选择相册',
-  customButtons: [ // 自定义按钮
-    {
-      name: '自定义name',
-      title: '自定义title'
-    }
-  ],
+  // customButtons: [ // 自定义按钮
+  //   {
+  //     name: '自定义name',
+  //     title: '自定义title'
+  //   }
+  // ],
   quality: 0.8, // 图片质量
   allowsEditing: true, // 是否允许内置功能对照片进行拉伸、剪裁操作
   noData: false, // 图片转成base64
@@ -62,24 +62,24 @@ const CLOUDINARY = {
   audio: 'https://api.cloudinary.com/v1_1/dlwilyjng/raw/upload',
 };
 
-function avatar(id, type) {
-  if(id.indexOf('http') > -1) {
-    return id;
-  }
+// function avatar(id, type) {
+//   if(id.indexOf('http') > -1) {
+//     return id;
+//   }
 
-  if(id.indexOf('data:image') > -1) {
-    return id;
-  }
+//   if(id.indexOf('data:image') > -1) {
+//     return id;
+//   }
 
-  return CLOUDINARY.base + '/' + type + '/upload/' + id
-}
+//   return CLOUDINARY.base + '/' + type + '/upload/' + id
+// }
 
 export default class AccountAvatar extends Component {
   constructor(props) {
     super(props);
     this.state = {
       logined: false,
-      user: null,
+      user: props.user,
       avatarProgress: 0,
       avatarUploading: false,
     };
@@ -364,10 +364,10 @@ export default class AccountAvatar extends Component {
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: '#F5FCFF',
+  // },
   // 顶部的条
   toolBar: {
     flexDirection: 'row',

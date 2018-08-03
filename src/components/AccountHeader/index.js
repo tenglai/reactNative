@@ -177,10 +177,10 @@ export default class AccountHeader extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5FCFF',
-  },
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: '#F5FCFF',
+  // },
   toolBar: {
     flexDirection: 'row',
     paddingTop: 25,
